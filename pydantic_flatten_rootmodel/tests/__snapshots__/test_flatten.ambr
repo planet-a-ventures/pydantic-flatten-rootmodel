@@ -1,0 +1,4 @@
+# serializer version: 1
+# name: test_collapse_field_infos
+  FieldInfo(annotation=NoneType, required=True, alias='a', alias_priority=2, examples=['bar', 'bla', 'foo'])
+# ---

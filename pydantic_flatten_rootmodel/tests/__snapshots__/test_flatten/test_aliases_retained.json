@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "grrrr": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Grrrr"
+    },
+    "meow": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Meow"
+    },
+    "type": {
+      "anyOf": [
+        {
+          "const": "cat",
+          "type": "string"
+        },
+        {
+          "const": "dog",
+          "type": "string"
+        }
+      ],
+      "title": "Type"
+    }
+  },
+  "required": [
+    "meow",
+    "grrrr",
+    "type"
+  ],
+  "title": "FlattenedPet",
+  "type": "object"
+}

@@ -1,0 +1,41 @@
+{
+  "properties": {
+    "bark": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Bark"
+    },
+    "meow": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Meow"
+    },
+    "pet_type": {
+      "enum": [
+        "cat",
+        "dog"
+      ],
+      "title": "Pet Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "meow",
+    "bark",
+    "pet_type"
+  ],
+  "title": "FlattenedPet",
+  "type": "object"
+}

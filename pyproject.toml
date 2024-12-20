@@ -1,0 +1,18 @@
+[project]
+name = "pydantic-flatten-rootmodel"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # We support the `Discriminator` class released on 2023-11-13
+    "pydantic>=2.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=6.0.0",
+    "pytest-watcher>=0.4.3",
+    "pytest>=8.3.4",
+    "syrupy>=4.8.0",
+]
