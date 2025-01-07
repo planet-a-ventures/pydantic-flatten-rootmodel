@@ -21,8 +21,6 @@ def is_annotated_with_union(o: Any):
     """
     Whether the passed object is annotated with the given type
     """
-    if type is None:
-        raise ValueError("target type must not be null")
     if o is None:
         return False
     return is_annotated_type(o) and is_union_type(get_type_annotation(o))
@@ -205,37 +203,8 @@ def flatten_root_model(root_model: type[RootModel]) -> type[BaseModel]:
                 else:
                     discriminator_values.append(disc_field.default)
 
-        # Make the discriminator field a Literal if we have valid values
-        if any(v is None for v in discriminator_values):
-            # If we have None values, we can't form a strict Literal.
-            # We'll leave it as a Union of possible types. Or just a string if all but one is None.
-            # For simplicity, if all are strings except None, we can do Union[str, None].
-            # But safer to just use Union of all possible values' types.
-            unique_types = set(type(v) for v in discriminator_values if v is not None)
-            # If multiple distinct types, fallback to `str` or `Any`.
-            # For simplicity, use Union of them, mark optional if None present
-            if len(unique_types) == 1:
-                single_type = unique_types.pop()
-                final_type = (
-                    single_type
-                    if None not in discriminator_values
-                    else Optional[single_type]
-                )
-            else:
-                # Different types, just use a union of them all
-                typed_values = [
-                    Literal[v] for v in discriminator_values if v is not None
-                ]
-                if typed_values:
-                    final_type = Union[tuple(typed_values)]
-                    if None in discriminator_values:
-                        final_type = Optional[final_type]
-                else:
-                    # If all are None (which is bizarre), just Optional[str]
-                    final_type = Optional[str]
-        else:
-            # All values are non-None, we can form a Literal
-            final_type = Literal[tuple(discriminator_values)]
+        # All values are non-None, we can form a Literal
+        final_type = Literal[tuple(discriminator_values)]
 
         # Override the field data for the discriminator
         field_data[discriminator_field_name]["types"] = [final_type]

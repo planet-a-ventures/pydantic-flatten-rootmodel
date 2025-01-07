@@ -1,6 +1,6 @@
 import json
-from typing import Annotated, Any, List, Literal, TypeVar, Union
-from pydantic import BaseModel, Discriminator, Field, RootModel, Tag
+from typing import Annotated, Any, ClassVar, List, Literal, TypeVar, Union
+from pydantic import BaseModel, ConfigDict, Discriminator, Field, RootModel, Tag
 
 import pytest
 
@@ -25,10 +25,10 @@ def dump_model(m: BaseModel):
 
 
 def assert_model(m: BaseModel, snapshot):
-    print("Original: ", dump_model(m))
+    # print("Original: ", dump_model(m))
     flattened_model = flatten_root_model(m)
     flattened = flattened_model.model_json_schema(mode="serialization")
-    print("Flattened: ", json.dumps(flattened, indent=4))
+    # print("Flattened: ", json.dumps(flattened, indent=4))
     assert flattened == snapshot
 
 
@@ -42,11 +42,16 @@ class Dog(BaseModel):
     bark: str
 
 
+class Unknown(BaseModel):
+    pet_type: Annotated[Literal[None], Field()]
+
+
 def test_is_annotated_with_union():
     S = Annotated[Union[str, int], Field()]
     assert is_annotated_with_union(S)
     S = Annotated[str | int, Field()]
     assert is_annotated_with_union(S)
+    assert is_annotated_with_union(None) is False
 
 
 def test_is_union_or_annotated_with_union():
@@ -54,6 +59,7 @@ def test_is_union_or_annotated_with_union():
     S = Annotated[U, Field()]
     assert is_union_or_annotated_with_union(U)
     assert is_union_or_annotated_with_union(S)
+    assert is_union_or_annotated_with_union(None) is False
 
 
 def test_get_type_annotation():
@@ -124,8 +130,14 @@ def test_collapse_field_infos(snapshot):
     )
     assert field == snapshot
 
+    with pytest.raises(ValueError):
+        collapse_field_infos([])
 
-def test_special_values(snapshot_json):
+    with pytest.raises(ValueError):
+        collapse_field_infos(None)
+
+
+def test_special_values():
     class SpecialValue(BaseModel):
         value: int
 
@@ -143,5 +155,18 @@ def test_class_vars_retained():
     raise NotImplementedError()
 
 
-def test_None_type_discriminator():
-    raise NotImplementedError()
+def test_None_type_discriminator(snapshot_json):
+    class Pet(RootModel[Union[Cat, Dog, Unknown]]):
+        root: Annotated[Union[Cat, Dog, Unknown], Discriminator("pet_type")]
+
+    with pytest.warns(
+        UserWarning, match="The flattened discriminator may not be strictly correct."
+    ):
+        assert_model(Pet, snapshot_json)
+
+
+def test_None_type_discriminator_field(snapshot_json):
+    class Pet(RootModel[Union[Cat, Dog, Unknown]]):
+        root: Annotated[Union[Cat, Dog, Unknown], Field(discriminator="pet_type")]
+
+    assert_model(Pet, snapshot_json)
