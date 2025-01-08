@@ -1,3 +1,4 @@
+from inspect import get_annotations
 from types import UnionType
 import warnings
 from typing import (
@@ -108,7 +109,7 @@ def flatten_root_model(
         raise ValueError("Only RootModels are supported")
 
     # Extract the root type from the RootModel
-    root_type = root_model.__annotations__.get("root")
+    root_type = get_annotations(root_model, eval_str=True)["root"]
 
     # If not a union, just return the original model
     if not is_union_or_annotated_with_union(root_type):
