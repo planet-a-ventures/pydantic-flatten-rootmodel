@@ -67,7 +67,15 @@ class FieldData(TypedDict):
     infos: List[FieldInfo]
 
 
-def flatten_root_model(root_model: type[RootModel]) -> type[BaseModel]:
+def get_class_vars(c: type[BaseModel]):
+    return {
+        k: v for k, v in c.__dict__.items() if not callable(v) and not k.startswith("_")
+    }
+
+
+def flatten_root_model(
+    root_model: type[RootModel], retain_class_vars=False
+) -> type[BaseModel]:
     """
     Given a RootModel that wraps a Union of Pydantic models, produce a new model that:
     - Identifies if the root is a union of models.
@@ -86,6 +94,9 @@ def flatten_root_model(root_model: type[RootModel]) -> type[BaseModel]:
     ----------
     root_model : type[BaseModel]
         The RootModel that may wrap a union of Pydantic models.
+    retain_class_vars: boolean
+        Whether to retain class variables of the union types and the root model. Clashing class vars are overwritten as follows: union order, then root model.
+        E.g. For a root model X with union A and B, the resulting class vars are `{**a_vars,**b_vars,**x_vars}`
 
     Returns
     -------
@@ -157,11 +168,15 @@ def flatten_root_model(root_model: type[RootModel]) -> type[BaseModel]:
     field_data: dict[str, FieldData] = {}
     total_variants = len(union_types)
 
+    union_class_vars = {}
     for field_name in all_field_names:
         types_for_field = []
         present_count = 0
         infos_for_field = []
-        for _, fields in variants_fields:
+        for t, fields in variants_fields:
+            if retain_class_vars:
+                union_class_vars = {**union_class_vars, **get_class_vars(t)}
+            # print("class_vars", class_vars)
             if field_name in fields:
                 f_info: FieldInfo = fields[field_name]
                 f_type = f_info.annotation
@@ -231,6 +246,13 @@ def flatten_root_model(root_model: type[RootModel]) -> type[BaseModel]:
 
     # Create a new model with the combined fields
     FlattenedModel = create_model(f"Flattened{root_model.__name__}", **flattened_fields)
+
+    if retain_class_vars:
+        for key, value in union_class_vars.items():
+            setattr(FlattenedModel, key, value)
+        for key, value in get_class_vars(root_model).items():
+            setattr(FlattenedModel, key, value)
+
     return FlattenedModel
 
 

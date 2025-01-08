@@ -151,8 +151,44 @@ def test_special_values():
         assert flatten_root_model(DiscriminatedModel) is DiscriminatedModel
 
 
-def test_class_vars_retained():
-    raise NotImplementedError()
+def test_class_vars_retained(snapshot_json):
+
+    class A(BaseModel):
+        type: Annotated[Literal["a"], Field()]
+        a: ClassVar[dict] = {"a": "a"}
+        b_over_a: ClassVar = {"a": "a"}
+        root_over_unions: ClassVar = {"a": "a"}
+
+    class B(BaseModel):
+        type: Annotated[Literal["b"], Field()]
+        b: ClassVar[dict] = {"b": "b"}
+        b_over_a: ClassVar = {"b": "b"}
+        root_over_unions: ClassVar = {"b": "b"}
+
+    class C(RootModel[Union[A, B]]):
+        root: Annotated[Union[A, B], Field(discriminator="type")]
+
+        some_config: ClassVar[dict] = {"foo": "bar"}
+        model_config = ConfigDict(arbitrary_types_allowed=True)
+        root_over_unions: ClassVar = {"c": "c"}
+
+    FlattenedModel = flatten_root_model(C, retain_class_vars=True)
+
+    assert FlattenedModel.some_config == C.some_config
+    assert FlattenedModel.model_config == C.model_config
+    assert FlattenedModel.a == A.a
+    # Overwriting is done in Union order
+    assert FlattenedModel.b_over_a == B.b_over_a
+    # But RootModel trumps
+    assert FlattenedModel.root_over_unions == C.root_over_unions
+
+    # class_vars = {
+    #     k: v
+    #     for k, v in FlattenedModel.__dict__.items()
+    #     if not callable(v) and not k.startswith("__")
+    # }
+    # print(class_vars)
+    # dir(FlattenedModel)
 
 
 def test_None_type_discriminator(snapshot_json):

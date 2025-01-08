@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "bark": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Bark"
+    },
+    "meow": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Meow"
+    },
+    "pet_type": {
+      "anyOf": [
+        {
+          "const": "cat",
+          "type": "string"
+        },
+        {
+          "const": "dog",
+          "type": "string"
+        },
+        {
+          "const": null,
+          "type": "null"
+        }
+      ],
+      "title": "Pet Type"
+    }
+  },
+  "required": [
+    "meow",
+    "bark",
+    "pet_type"
+  ],
+  "title": "FlattenedPet",
+  "type": "object"
+}
