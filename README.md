@@ -5,7 +5,7 @@ Library to transform a [Pydantic](https://pydantic.dev/)
 with discriminated unions into a flattened BaseModel.
 
 ```py
-from pydantic-flatten-rootmodel import flatten_root_model
+from pydantic_flatten_rootmodel import flatten_root_model
 
 class Cat(BaseModel):
     pet_type: Annotated[Literal["cat"], Field()]
