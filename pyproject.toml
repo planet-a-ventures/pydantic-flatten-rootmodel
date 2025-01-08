@@ -1,6 +1,6 @@
 [project]
 name = "pydantic-flatten-rootmodel"
-version = "0.1.1"
+version = "0.1.2"
 description = "Library to transform a Pydantic RootModel into a flattened BaseModel"
 authors = [
   { name="Joscha Feth", email="joscha@planet-a.com" },
