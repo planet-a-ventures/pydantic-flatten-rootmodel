@@ -27,6 +27,7 @@
   };
 
   scripts.format.exec = ''
+    yamlfmt .
     pre-commit run --all-files
   '';
 
@@ -55,6 +56,10 @@
 
   enterTest = ''
     test-all
+  '';
+
+  scripts.build.exec = ''
+    uv build
   '';
 
   # See full reference at https://devenv.sh/reference/options/
