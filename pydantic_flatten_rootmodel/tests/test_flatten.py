@@ -1,6 +1,14 @@
 import json
 from typing import Annotated, Any, ClassVar, List, Literal, TypeVar, Union
-from pydantic import BaseModel, ConfigDict, Discriminator, Field, RootModel, Tag
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Discriminator,
+    Field,
+    RootModel,
+    Tag,
+    model_serializer,
+)
 
 import pytest
 
@@ -182,14 +190,6 @@ def test_class_vars_retained(snapshot_json):
     # But RootModel trumps
     assert FlattenedModel.root_over_unions == C.root_over_unions
 
-    # class_vars = {
-    #     k: v
-    #     for k, v in FlattenedModel.__dict__.items()
-    #     if not callable(v) and not k.startswith("__")
-    # }
-    # print(class_vars)
-    # dir(FlattenedModel)
-
 
 def test_None_type_discriminator(snapshot_json):
     class Pet(RootModel[Union[Cat, Dog, Unknown]]):
@@ -206,3 +206,15 @@ def test_None_type_discriminator_field(snapshot_json):
         root: Annotated[Union[Cat, Dog, Unknown], Field(discriminator="pet_type")]
 
     assert_model(Pet, snapshot_json)
+
+
+@pytest.mark.skip("not implemented, yet, but would be good")
+def test_retain_parent_class():
+
+    class MyRootModel(RootModel):
+        @model_serializer(mode="wrap")
+        def ser_model(self, nxt):
+            return nxt(self)
+
+    class Pet(MyRootModel[Union[Cat, Dog]]):
+        root: Annotated[Union[Cat, Dog], Field(discriminator="pet_type")]

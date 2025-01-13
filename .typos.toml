@@ -1,0 +1,2 @@
+[default.extend-words]
+"ser" = "ser" # don't autocorrect 'ser_model' to 'set_model'
