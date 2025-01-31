@@ -1,5 +1,7 @@
 # pydantic-flatten-rootmodel
 
+[![PyPI version](https://img.shields.io/pypi/v/pydantic-flatten-rootmodel.svg)](https://pypi.org/project/pydantic-flatten-rootmodel/)
+
 Library to transform a [Pydantic](https://pydantic.dev/)
 [RootModel](https://docs.pydantic.dev/latest/api/root_model/)
 with discriminated unions into a flattened BaseModel.
